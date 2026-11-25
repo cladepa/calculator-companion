@@ -1,0 +1,17 @@
+# Build outputs
+daemon/build/
+*.o
+*.a
+*.so
+
+# Android/Gradle
+app/build/
+app/.gradle/
+*.apk
+*.ap_
+local.properties
+.gradle/
+
+# Misc
+*.log
+.DS_Store
