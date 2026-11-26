@@ -1,6 +1,6 @@
 CC ?= gcc
 CFLAGS ?= -Wall -Wextra -O2 -std=gnu11
-SRC = src/main.c src/log.c src/config.c src/sim_monitor.c src/report.c
+SRC = src/main.c src/log.c src/config.c src/sim_monitor.c src/report.c src/http_client.c
 BIN = build/guardd
 
 all: $(BIN)
@@ -8,7 +8,7 @@ all: $(BIN)
 build:
 	mkdir -p build
 
-$(BIN): $(SRC) src/log.h src/config.h src/sim_monitor.h src/report.h | build
+$(BIN): $(SRC) src/log.h src/config.h src/sim_monitor.h src/report.h src/http_client.h | build
 	$(CC) $(CFLAGS) -o $(BIN) $(SRC)
 
 clean:

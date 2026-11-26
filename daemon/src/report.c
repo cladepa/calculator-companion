@@ -1,5 +1,6 @@
 #include "report.h"
 #include "log.h"
+#include "http_client.h"
 
 #include <stdio.h>
 
@@ -10,19 +11,24 @@ void report_sim_event(const config_t *cfg, const sim_identity_t *baseline,
         return;
     }
 
+    char body[256];
+    snprintf(body, sizeof(body),
+             "{\"event\":\"sim_changed\",\"baseline\":\"%s\",\"current\":\"%s\",\"roaming\":%s}",
+             baseline->operator_numeric, current->operator_numeric,
+             current->roaming ? "true" : "false");
+
     for (int i = 0; i < cfg->server_count; i++) {
         if (cfg->test_mode) {
-            log_write(LOG_INFO,
-                      "[TEST_MODE] would POST to %s: {\"event\":\"sim_changed\",\"baseline\":\"%s\",\"current\":\"%s\",\"roaming\":%s}",
-                      cfg->server_urls[i], baseline->operator_numeric,
-                      current->operator_numeric, current->roaming ? "true" : "false");
+            log_write(LOG_INFO, "[TEST_MODE] would POST to %s: %s", cfg->server_urls[i], body);
+            continue;
+        }
+
+        int status = 0;
+        char err[128] = {0};
+        if (http_post(cfg->server_urls[i], body, &status, err, sizeof(err)) == 0) {
+            log_write(LOG_INFO, "[LIVE] reported to %s (HTTP %d)", cfg->server_urls[i], status);
         } else {
-            /* Real HTTP(S) POST not implemented yet - this is the next
-               piece to build (minimal client, no dependency on system
-               curl/wget per our earlier decision). */
-            log_write(LOG_ERROR,
-                      "[LIVE] real network send to %s not implemented yet - report dropped",
-                      cfg->server_urls[i]);
+            log_write(LOG_ERROR, "[LIVE] report to %s failed: %s", cfg->server_urls[i], err);
         }
     }
 }
