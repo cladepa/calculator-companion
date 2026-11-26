@@ -5,6 +5,7 @@
 #include "log.h"
 #include "config.h"
 #include "sim_monitor.h"
+#include "report.h"
 
 int main(int argc, char **argv) {
     config_t cfg;
@@ -44,11 +45,8 @@ int main(int argc, char **argv) {
         if (!sim_monitor_same(&current, &baseline)) {
             log_write(LOG_WARN, "SIM CHANGED: baseline=%s current=%s roaming=%d",
                        baseline.operator_numeric, current.operator_numeric, current.roaming);
-            if (cfg.test_mode) {
-                log_write(LOG_INFO, "[TEST_MODE] would start decoy-window escalation sequence now (no real action taken)");
-            } else {
-                log_write(LOG_WARN, "[LIVE] escalation sequence not implemented yet - no action taken");
-            }
+            log_write(LOG_INFO, "decoy-window escalation sequence (1/3/5 min, 3 strikes) not implemented yet - reporting immediately for now");
+            report_sim_event(&cfg, &baseline, &current);
         } else {
             log_write(LOG_DEBUG, "sim unchanged (operator=%s)", current.operator_numeric);
         }

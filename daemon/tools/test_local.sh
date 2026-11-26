@@ -21,6 +21,7 @@ log_path=$LOG
 baseline_path=$WORKDIR/sim_baseline.txt
 test_mode=1
 poll_interval_sec=1
+server_urls=https://server1.example.test/report, https://server2.example.test/report
 EOF
 
 echo "== run 1: no baseline yet, should adopt current SIM (43408) =="
@@ -52,6 +53,15 @@ if ! grep -q "adopting current SIM as baseline" "$LOG"; then
 fi
 if ! grep -q "roaming=1" "$LOG"; then
     echo "FAIL: roaming flag was not detected/logged on run 4"
+    exit 1
+fi
+REPORT_COUNT=$(grep -c "would POST to" "$LOG")
+if [ "$REPORT_COUNT" -ne 4 ]; then
+    echo "FAIL: expected 4 'would POST to' lines (2 SIM changes x 2 servers), got $REPORT_COUNT"
+    exit 1
+fi
+if ! grep -q "server1.example.test" "$LOG" || ! grep -q "server2.example.test" "$LOG"; then
+    echo "FAIL: not all configured servers appear in the report log"
     exit 1
 fi
 
