@@ -1,8 +1,10 @@
 #include "report.h"
 #include "log.h"
 #include "http_client.h"
+#include "https_client.h"
 
 #include <stdio.h>
+#include <string.h>
 
 void report_sim_event(const config_t *cfg, const sim_identity_t *baseline,
                        const sim_identity_t *current) {
@@ -25,7 +27,15 @@ void report_sim_event(const config_t *cfg, const sim_identity_t *baseline,
 
         int status = 0;
         char err[128] = {0};
-        if (http_post(cfg->server_urls[i], body, &status, err, sizeof(err)) == 0) {
+        int ok;
+        if (strncmp(cfg->server_urls[i], "https://", 8) == 0) {
+            ok = (https_post(cfg->server_urls[i], body, cfg->ca_cert_path,
+                              &status, err, sizeof(err)) == 0);
+        } else {
+            ok = (http_post(cfg->server_urls[i], body, &status, err, sizeof(err)) == 0);
+        }
+
+        if (ok) {
             log_write(LOG_INFO, "[LIVE] reported to %s (HTTP %d)", cfg->server_urls[i], status);
         } else {
             log_write(LOG_ERROR, "[LIVE] report to %s failed: %s", cfg->server_urls[i], err);

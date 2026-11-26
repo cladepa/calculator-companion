@@ -13,6 +13,8 @@ typedef struct {
 
     char server_urls[CFG_MAX_SERVERS][CFG_MAX_URL]; /* report destinations, sent in parallel */
     int  server_count;
+
+    char ca_cert_path[CFG_MAX_PATH]; /* PEM file to trust for https:// servers; required for https */
 } config_t;
 
 /* Fills cfg with built-in defaults. Always call this before config_load_file. */

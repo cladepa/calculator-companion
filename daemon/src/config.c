@@ -78,6 +78,8 @@ int config_load_file(config_t *cfg, const char *path) {
             if (v > 0) cfg->poll_interval_sec = v;
         } else if (strcmp(key, "server_urls") == 0) {
             parse_server_urls(cfg, value);
+        } else if (strcmp(key, "ca_cert_path") == 0) {
+            strncpy(cfg->ca_cert_path, value, CFG_MAX_PATH - 1);
         }
         /* unknown keys are silently ignored, forward-compatible */
     }
